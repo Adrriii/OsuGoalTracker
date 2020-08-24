@@ -1,0 +1,18 @@
+{
+    "user": {
+        "api_key": "api_key",
+        "user_id": 4579132,
+        "mode": 3,
+        "level_goal": 100
+    },
+    "config": {
+        "refresh_tries": 5,
+        "tries_sleep_ms": 500,
+        "manual_sleep_ms": 10000,
+        "refresh_on_ranking_panel": false,
+        "refresh_on_idle_screen": false,
+        "refresh_on_select_screen": true,
+        "live_play_score_path": "E:\\stream\\Sync\\livedata.txt",
+        "live_play_score": true
+    }
+}
