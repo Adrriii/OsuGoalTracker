@@ -14,5 +14,9 @@
         "refresh_on_select_screen": true,
         "live_play_score_path": "E:\\stream\\Sync\\livedata.txt",
         "live_play_score": true
+    },
+    "preferences": {
+        "display_approx_maps": true,
+        "display_approx_time": true
     }
 }

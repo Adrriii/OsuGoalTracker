@@ -22,6 +22,10 @@ nconf.defaults(
             "refresh_on_select_screen": true,
             "live_play_score_path": "E:\\stream\\Sync\\livedata.txt",
             "live_play_score": true
+        },
+        "preferences": {
+            "display_approx_maps": true,
+            "display_approx_time": true
         }
     }
 );
@@ -43,6 +47,9 @@ const live_play_score_path = nconf.get("config:live_play_score_path");
 const live_play_score = nconf.get("config:live_play_score");
 const manual_sleep_ms = nconf.get("config:manual_sleep_ms");
 
+const display_approx_maps = nconf.get("preferences:display_approx_maps");
+const display_approx_time = nconf.get("preferences:display_approx_time");
+
 const gamestate = {
     PLAYING: 'Playing',
     RANKING: 'Ranking',
@@ -51,6 +58,7 @@ const gamestate = {
 }
 
 let score_average = 970000;
+let seconds_average = 90;
 let score_goal = GetRequiredScoreForLevel(level_goal);
 
 // https://olc.howl.moe/script.js
@@ -67,13 +75,35 @@ function GetRequiredScoreForLevel(level) {
 	return 26931190829 + 100000000000*(level-100);
 }
 
+// https://stackoverflow.com/a/6313008
+String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return hours+':'+minutes+':'+seconds;
+}
+
 function formatNumber(n) {
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 async function writeScore(score) {
     let diff = score_goal - score;
-    fs.writeFile("out.txt", formatNumber(diff)+" remaining for level "+formatNumber(level_goal)+" (approx. "+formatNumber(parseInt(diff/score_average))+" maps)", function (err,data) {
+
+    let display = formatNumber(diff)+" remaining for level "+formatNumber(level_goal);
+
+    let maps = parseInt(diff/score_average);
+    let seconds = parseInt(diff/seconds_average);
+
+    if(display_approx_maps) display += " (approx. "+formatNumber(maps)+" maps)";
+    if(display_approx_time) display += " (approx. "+seconds.toString().toHHMMSS()+")";
+
+    fs.writeFile("out.txt", display, function (err,data) {
         if (err) {
           return console.log(err);
         }
@@ -129,6 +159,7 @@ class ScoreWatcher {
 
             if(data) {
                 score_average = data.total_score / data.playcount;
+                seconds_average = data.total_score / data.total_seconds_played;
 
                 if(data && data.total_score != this.current_score) {
                     this.current_score = parseInt(data.total_score);
